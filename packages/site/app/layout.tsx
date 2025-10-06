@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { Providers } from "./providers";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "ConfidentialTranscript"
@@ -28,6 +29,7 @@ export default async function RootLayout({
       </head>
       <body className={`text-foreground antialiased`}>
         <Providers>{children}</Providers>
+        <Toaster position="bottom-center" toastOptions={{ className: "toast" }} />
       </body>
     </html>
   );

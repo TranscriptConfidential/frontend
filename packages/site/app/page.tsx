@@ -23,14 +23,21 @@ import {
   Upload,
   File,
 } from "lucide-react";
+import { ConfidentialTranscriptAddresses } from "@/abi/ConfidentialTranscriptAddresses";
+import { ConfidentialTranscriptABI } from "@/abi/ConfidentialTranscriptABI";
 import { useMetaMaskEthersSigner } from "@/hooks/metamask/useMetaMaskEthersSigner";
-import { FileObject, PinataSDK } from 'pinata-web3';
+import { PinataSDK } from 'pinata-web3';
+import { ethers } from "ethers";
+import { useFhevm } from "@/fhevm/useFhevm";
+import { toast } from "sonner";
 
 export default function ConfidentialTranscriptDashboard() {
 
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState("")
   const [loading, setLoading] = useState(false)
+  const [loadinguni, setLoadinguni] = useState(false)
+  const [loadingpg, setLoadingpg] = useState(false)
   const [txHash, setTxHash] = useState("")
 
   // Admin/Owner functions
@@ -59,7 +66,15 @@ export default function ConfidentialTranscriptDashboard() {
   // Student functions
   const [tokenIdToRevoke, setTokenIdToRevoke] = useState("");
 
-  const { acount, isConnected, disconnect, connect } = useMetaMaskEthersSigner();
+  const { acount, isConnected, disconnect, connect, provider, chainId, ethersSigner, initialMockChains } = useMetaMaskEthersSigner();
+
+  const { status: fheInstanceStatus, instance: fheInstance } = useFhevm({
+    provider,
+    chainId,
+    initialMockChains,
+    enabled: true,
+  });
+
 
   const connectWallet = async () => {
     setLoading(true)
@@ -163,21 +178,52 @@ export default function ConfidentialTranscriptDashboard() {
     }
   }
 
-  const handleSetUniversity = async () => {
-    setLoading(true)
+  const handleSetUniversity = async (account: any) => {
+    setLoadinguni(true)
     // Contract interaction would go here
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+    try {
+        console.log("handleSetUniversity");
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+        console.log({account});
+        const tx = await contract.setUniversity(account);
+        const response = await tx.wait()
+        console.log({response});
+        toast.success("handleSetUniversity Txn success");
+        setLoadinguni(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+         setLoadinguni(false)
+    }
+
   }
 
-  const handleSetPGAddress = async () => {
-    setLoading(true)
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+  const handleSetPGAddress = async (account: any) => {
+    setLoadingpg(true)
+
+    try {
+        console.log("handleSetPGAddress");
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+        console.log({account});
+        const tx = await contract.setPGAddress(account);
+        const response = await tx.wait()
+        console.log({response});
+
+        toast.success("handleSetPGAddress Txn success");
+        setLoadingpg(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoadingpg(false)
+    }
   }
 
   const handleMintTranscript = async () => {
@@ -354,11 +400,11 @@ export default function ConfidentialTranscriptDashboard() {
                         />
                       </div>
                       <Button
-                        onClick={handleSetUniversity}
+                        onClick={() => handleSetUniversity(newUniAddress)}
                         disabled={loading || !newUniAddress}
                         className="w-full bg-primary hover:bg-primary/90"
                       >
-                        {loading ? (
+                        {loadinguni ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Processing...
@@ -394,11 +440,11 @@ export default function ConfidentialTranscriptDashboard() {
                         />
                       </div>
                       <Button
-                        onClick={handleSetPGAddress}
+                        onClick={() => handleSetPGAddress(newPGAddress)}
                         disabled={loading || !newPGAddress}
                         className="w-full bg-primary hover:bg-primary/90"
                       >
-                        {loading ? (
+                        {loadingpg ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Processing...
