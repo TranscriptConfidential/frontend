@@ -23,7 +23,8 @@ import {
   Upload,
   File,
 } from "lucide-react";
-import { useMetaMaskEthersSigner } from "@/hooks/metamask/useMetaMaskEthersSigner"
+import { useMetaMaskEthersSigner } from "@/hooks/metamask/useMetaMaskEthersSigner";
+import { FileObject, PinataSDK } from 'pinata-web3';
 
 export default function ConfidentialTranscriptDashboard() {
 
@@ -40,8 +41,9 @@ export default function ConfidentialTranscriptDashboard() {
   const [uploading, setUploading] = useState(false)
   const [uploadedCID, setUploadedCID] = useState("")
   const [cidAsNumber, setCidAsNumber] = useState("")
-//   const [pinataApiKey, setPinataApiKey] = useState("")
-//   const [pinataSecretKey, setPinataSecretKey] = useState("")
+
+//   const [cidToNumber_, setCidToNumber_] = useState("")
+//   const [numberToCid_, setNumberToCid_] = useState("")
 
   // University functions
   const [studentAddress, setStudentAddress] = useState("")
@@ -85,6 +87,23 @@ export default function ConfidentialTranscriptDashboard() {
     }
   }
 
+   const numberToCid = (numStr: string): string => {
+    // Note: This is a simplified reverse conversion
+    // In production, you should store the CID mapping or use proper CID encoding
+    try {
+      let num = BigInt(numStr)
+      let result = ""
+      while (num > 0n) {
+        result = String.fromCharCode(Number(num % 256n)) + result
+        num = num / 256n
+      }
+      return result
+    } catch (error) {
+      console.error("[v0] Error converting number to CID:", error)
+      return ""
+    }
+  }
+
   const cidToNumber = (cid: string): string => {
     // Remove 'Qm' prefix if present (CIDv0) or decode CIDv1
     // For simplicity, we'll convert the CID string to a BigInt using its hash
@@ -104,40 +123,25 @@ export default function ConfidentialTranscriptDashboard() {
       alert("Please select a file first")
       return
     }
-    const pinataApiKey = "";
-    const pinataSecretKey = ""
 
-    if (!pinataApiKey || !pinataSecretKey) {
-      alert("Please enter your Pinata API credentials")
-      return
-    }
 
     setUploading(true)
 
     try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
 
-      const metadata = JSON.stringify({
-        name: `transcript-${Date.now()}.pdf`,
-      })
-      formData.append("pinataMetadata", metadata)
+      const pinata = new PinataSDK({
+            pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
+            pinataGateway: 'https://ipfs.io',
+      });
+      const response = await pinata.upload.file(selectedFile);
 
-      const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
-        method: "POST",
-        headers: {
-          pinata_api_key: pinataApiKey,
-          pinata_secret_api_key: pinataSecretKey,
-        },
-        body: formData,
-      })
 
-      if (!response.ok) {
+      console.log(response);
+      if (!response) {
         throw new Error("Upload failed")
       }
 
-      const data = await response.json()
-      const cid = data.IpfsHash
+      const cid = response.IpfsHash;
 
       setUploadedCID(cid)
 
@@ -146,7 +150,8 @@ export default function ConfidentialTranscriptDashboard() {
       setCidAsNumber(cidNumber)
 
       // Auto-populate the encrypted CID field
-      setEncCID(cidNumber)
+      setEncCID(cidNumber);
+      console.log(cidNumber)
 
       console.log("[v0] Uploaded to Pinata:", cid)
       console.log("[v0] CID as number:", cidNumber)
@@ -410,6 +415,25 @@ export default function ConfidentialTranscriptDashboard() {
               {/* University Tab */}
               <TabsContent value="university" className="space-y-6">
                 <div className="grid gap-6">
+
+                {/* <p>convert from cid to number</p>
+                <input type="text" placeholder="convert from cid to number" onChange={(e) => setCidToNumber_(e.target.value)} />
+                <button className="cursor-pointer" onClick={() => {
+                    console.log("convert from cid to number");
+                    console.log(cidToNumber_);
+                    const res = cidToNumber(cidToNumber_);
+                    console.log(res);
+                }}>convert..</button> */}
+
+                {/* <p>convert from number to cid</p>
+                <input type="text" placeholder="convert from number to cid" onChange={(e) => setNumberToCid_(e.target.value)} />
+                <button className="cursor-pointer" onClick={() => {
+                    console.log("convert from number to cid");
+                    console.log(numberToCid_);
+                    const res = numberToCid(numberToCid_);
+                    console.log(res);
+                }}>convert..</button> */}
+
                   <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
