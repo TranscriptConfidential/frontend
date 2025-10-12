@@ -1,5 +1,5 @@
 "use client"
-
+// "internaltype": "euint256"
 import type React from "react"
 
 import { useState } from "react"
@@ -26,10 +26,11 @@ import {
 import { ConfidentialTranscriptAddresses } from "@/abi/ConfidentialTranscriptAddresses";
 import { ConfidentialTranscriptABI } from "@/abi/ConfidentialTranscriptABI";
 import { useMetaMaskEthersSigner } from "@/hooks/metamask/useMetaMaskEthersSigner";
-import { PinataSDK } from 'pinata-web3';
-import { ethers } from "ethers";
+import { ethers, hexlify } from "ethers";
 import { useFhevm } from "@/fhevm/useFhevm";
 import { toast } from "sonner";
+import { getFheInstance, initializeFheInstance } from "@/utils/fheinstance";
+
 
 export default function ConfidentialTranscriptDashboard() {
 
@@ -45,23 +46,25 @@ export default function ConfidentialTranscriptDashboard() {
   const [newPGAddress, setNewPGAddress] = useState("")
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploadedCID, setUploadedCID] = useState("")
-  const [cidAsNumber, setCidAsNumber] = useState("")
+//   const [uploading, setUploading] = useState(false)
+//   const [uploadedCID, setUploadedCID] = useState("")
+  const [cidNumber, setCidNumber] = useState("")
+   const [GPA, setGPA] = useState("")
 
-//   const [cidToNumber_, setCidToNumber_] = useState("")
-//   const [numberToCid_, setNumberToCid_] = useState("")
 
   // University functions
   const [studentAddress, setStudentAddress] = useState("")
   const [studentID, setStudentID] = useState("")
-  const [encCID, setEncCID] = useState("")
-  const [encGPA, setEncGPA] = useState("")
-  const [inputProof, setInputProof] = useState("")
+ 
+
 
   // PG Authority functions
   const [checkStudentAddress, setCheckStudentAddress] = useState("")
   const [gpaThreshold, setGpaThreshold] = useState("350")
+
+  const [isEligibleForScholarship, setIsEligibleForScholarship] = useState(false);
+  const [decryptedCid, setDecryptedCid] = useState("")
+  const [baseCid, setBaseCid] = useState("");
 
   // Student functions
   const [tokenIdToRevoke, setTokenIdToRevoke] = useState("");
@@ -102,87 +105,59 @@ export default function ConfidentialTranscriptDashboard() {
     }
   }
 
-   const numberToCid = (numStr: string): string => {
-    // Note: This is a simplified reverse conversion
-    // In production, you should store the CID mapping or use proper CID encoding
-    try {
-      let num = BigInt(numStr)
-      let result = ""
-      while (num > 0n) {
-        result = String.fromCharCode(Number(num % 256n)) + result
-        num = num / 256n
-      }
-      return result
-    } catch (error) {
-      console.error("[v0] Error converting number to CID:", error)
-      return ""
-    }
-  }
-
-  const cidToNumber = (cid: string): string => {
-    // Remove 'Qm' prefix if present (CIDv0) or decode CIDv1
-    // For simplicity, we'll convert the CID string to a BigInt using its hash
-    // In production, use a proper CID library like 'multiformats'
-
-    // Simple conversion: take the base58 decoded bytes as a number
-    // For demo purposes, we'll use a hash of the CID string
-    let hash = 0n
-    for (let i = 0; i < cid.length; i++) {
-      hash = hash * 256n + BigInt(cid.charCodeAt(i))
-    }
-    return hash.toString()
-  }
-
-  const handleUploadToPinata = async () => {
-    if (!selectedFile) {
-      alert("Please select a file first")
-      return
-    }
 
 
-    setUploading(true)
-
-    try {
-
-      const pinata = new PinataSDK({
-            pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
-            pinataGateway: 'https://ipfs.io',
-      });
-      const response = await pinata.upload.file(selectedFile);
+//   const handleUploadToPinata = async () => {
+//     if (!selectedFile) {
+//       alert("Please select a file first")
+//       return
+//     }
 
 
-      console.log(response);
-      if (!response) {
-        throw new Error("Upload failed")
-      }
+//     setUploading(true)
 
-      const cid = response.IpfsHash;
+//     try {
 
-      setUploadedCID(cid)
+//       const pinata = new PinataSDK({
+//             pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
+//             pinataGateway: 'https://ipfs.io',
+//       });
+//       const response = await pinata.upload.file(selectedFile);
 
-      // Convert CID to number
-      const cidNumber = cidToNumber(cid)
-      setCidAsNumber(cidNumber)
 
-      // Auto-populate the encrypted CID field
-      setEncCID(cidNumber);
-      console.log(cidNumber)
+//       console.log(response);
+//       if (!response) {
+//         throw new Error("Upload failed")
+//       }
 
-      console.log("[v0] Uploaded to Pinata:", cid)
-      console.log("[v0] CID as number:", cidNumber)
-    } catch (error) {
-      console.error("[v0] Upload error:", error)
-      alert("Failed to upload to Pinata. Please check your API credentials.")
-    } finally {
-      setUploading(false)
-    }
-  }
+//       const cid = response.IpfsHash;
+
+//       setUploadedCID(cid)
+
+ 
+//       const cidNumber = cidToNumber(cid)
+
+
+//       setCidAsNumber(cidNumber)
+
+//       // Auto-populate the encrypted CID field
+//       setEncCID(cidNumber);
+//       console.log(cidNumber)
+
+//       console.log("[v0] Uploaded to Pinata:", cid)
+//       console.log("[v0] CID as number:", cidNumber)
+//     } catch (error) {
+//       console.error("[v0] Upload error:", error)
+//       alert("Failed to upload to Pinata. Please check your API credentials.")
+//     } finally {
+//       setUploading(false)
+//     }
+//   }
 
   const handleSetUniversity = async (account: any) => {
     setLoadinguni(true)
     // Contract interaction would go here
     try {
-        console.log("handleSetUniversity");
 
         const contract = new ethers.Contract(
           ConfidentialTranscriptAddresses["11155111"].address,
@@ -206,7 +181,6 @@ export default function ConfidentialTranscriptDashboard() {
     setLoadingpg(true)
 
     try {
-        console.log("handleSetPGAddress");
 
         const contract = new ethers.Contract(
           ConfidentialTranscriptAddresses["11155111"].address,
@@ -226,20 +200,145 @@ export default function ConfidentialTranscriptDashboard() {
     }
   }
 
+
+    async function initializeFHE(): Promise<any> {
+        console.log("🔐 Initializing FHE instance...");
+
+        let fhe = getFheInstance();
+        if (!fhe) {
+            console.log("📦 No FHE instance found, creating new one...");
+            fhe = await initializeFheInstance();
+        }
+
+        if (!fhe) {
+            throw new Error("Failed to initialize FHE instance");
+        }
+
+        console.log("✅ FHE instance ready");
+        return fhe;
+    }
+  
+
   const handleMintTranscript = async () => {
     setLoading(true)
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+    console.log(`Signer: ${ethersSigner?.address}`);
+     console.log(`Account: ${acount}`);
+    try {
+
+        // we already have the cid/number from pinata
+        //..
+         const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+
+        const formattedGpa = BigInt(Number(GPA) * 100);
+        console.log({studentAddress, studentID, cidNumber, formattedGpa});
+
+
+        const fhe = await initializeFHE();
+        const input = await fhe.createEncryptedInput(ConfidentialTranscriptAddresses["11155111"].address, ethersSigner?.address);
+        input.add256(BigInt(cidNumber));
+        input.add16(formattedGpa);
+        const { handles, inputProof } = await input.encrypt();
+        const encryptedCidHex = hexlify(handles[0]);
+        const encryptedGpaHex = hexlify(handles[1]);
+        const proofHex = hexlify(inputProof);
+
+        console.log(encryptedCidHex, encryptedGpaHex, proofHex);
+ 
+        const tx = await contract.mintTranscriptExternal(studentAddress, studentID, encryptedCidHex, encryptedGpaHex, proofHex);
+        const response = await tx.wait()
+        console.log({response});
+
+
+        toast.success("mintTranscriptExternal Txn success");
+
+        setLoading(false)
+    } catch(err) {
+        console.log(err)
+        toast.error(JSON.stringify(err));
+        setLoading(false)
+    }
+ 
   }
 
   const handleCheckEligibility = async () => {
+
+    // pg address decrypts students gpa
     setLoading(true)
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+
+    try {
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner?.provider
+        );
+        // read encrypted student gpa
+        const res = await contract._transcripts(checkStudentAddress);
+        const encGpa = res[3];
+
+        const fhe = await initializeFHE();
+
+        let value = BigInt(0);
+        const keypair = fhe!.generateKeypair();
+        const handleContractPairs = [
+            {
+                handle: encGpa,
+                contractAddress: ConfidentialTranscriptAddresses["11155111"].address,
+            },
+        ];
+        const startTimeStamp = Math.floor(Date.now() / 1000).toString();
+        const durationDays = "2"; // String for consistency
+        const contractAddresses = [ConfidentialTranscriptAddresses["11155111"].address];
+
+        const eip712 = fhe!.createEIP712(
+            keypair.publicKey, 
+            contractAddresses, 
+            startTimeStamp, 
+            durationDays
+        );
+        
+
+        const signature = await ethersSigner!.signTypedData(
+            eip712.domain,
+            {
+                UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
+            },
+            eip712.message,
+        );
+
+        console.log('Signature:', signature);
+
+        const result = await fhe.userDecrypt(
+            handleContractPairs,
+            keypair.privateKey,
+            keypair.publicKey,
+            signature!.replace("0x", ""),
+            contractAddresses,
+            ethersSigner!.address,
+            startTimeStamp,
+            durationDays,
+        );
+
+        value = BigInt(result[encGpa]);
+
+        console.log({decryptedValue: String(Number(value) / 100)});
+        
+
+        if(Number(gpaThreshold) <= Number(value)) {
+            setIsEligibleForScholarship(true)
+        } else {
+            setIsEligibleForScholarship(false)
+        }
+
+        toast.success("handleCheckEligibility Txn success");
+        setLoading(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoading(false)
+    }
   }
 
   const handleRevokeTranscript = async () => {
@@ -252,10 +351,35 @@ export default function ConfidentialTranscriptDashboard() {
 
   const handleDecryptCID = async () => {
     setLoading(true)
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+
+    try {
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+
+ 
+        const tx = await contract.decryptCid();
+        const response = await tx.wait()
+        console.log({response});
+        if(!response) return;
+
+        // read value and set
+        const baseCid_ = await contract.cid();
+        console.log({baseCid_});
+        setBaseCid(baseCid_);
+        const decryptedVal = await contract._decryptedCID(ethersSigner?.address);
+        console.log({decryptedVal});
+        setDecryptedCid(decryptedVal.toString());
+
+        toast.success("handleDecryptCID Txn success");
+        setLoading(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoading(false)
+    }
   }
 
   return (
@@ -520,11 +644,11 @@ export default function ConfidentialTranscriptDashboard() {
                       </div>
 
                       <Button
-                        onClick={handleUploadToPinata}
-                        disabled={uploading || !selectedFile}
+                        // onClick={handleUploadToPinata}
+                        disabled={true}
                         className="w-full bg-primary hover:bg-primary/90"
                       >
-                        {uploading ? (
+                        {/* {uploading ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Uploading to IPFS...
@@ -534,10 +658,10 @@ export default function ConfidentialTranscriptDashboard() {
                             <Upload className="w-4 h-4 mr-2" />
                             Upload to Pinata
                           </>
-                        )}
+                        )} */}
                       </Button>
 
-                      {uploadedCID && (
+                      {/* {uploadedCID && (
                         <Alert className="bg-success/10 border-success/30">
                           <CheckCircle2 className="h-4 w-4 text-success" />
                           <AlertDescription className="space-y-2">
@@ -556,7 +680,8 @@ export default function ConfidentialTranscriptDashboard() {
                             </div>
                           </AlertDescription>
                         </Alert>
-                      )}
+                      )} */}
+
                     </CardContent>
                   </Card>
 
@@ -598,18 +723,18 @@ export default function ConfidentialTranscriptDashboard() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="enc-cid" className="text-foreground">
-                            Encrypted CID {/* Added helper text */}
-                            {uploadedCID && (
-                              <Badge variant="outline" className="ml-2 text-xs">
+                            CID Number {/* Added helper text */}
+                      
+                              {/* <Badge variant="outline" className="ml-2 text-xs">
                                 Auto-filled
-                              </Badge>
-                            )}
+                              </Badge> */}
+       
                           </Label>
                           <Input
                             id="enc-cid"
-                            placeholder="cid as number"
-                            value={encCID}
-                            onChange={(e) => setEncCID(e.target.value)}
+                            placeholder="cid number"
+                            value={cidNumber}
+                            onChange={(e) => setCidNumber(e.target.value)}
                             className="bg-input border-border text-foreground font-mono"
                           />
                         </div>
@@ -620,8 +745,8 @@ export default function ConfidentialTranscriptDashboard() {
                           <Input
                             id="enc-gpa"
                             placeholder="Gpa"
-                            value={encGPA}
-                            onChange={(e) => setEncGPA(e.target.value)}
+                            value={GPA}
+                            onChange={(e) => setGPA(e.target.value)}
                             className="bg-input border-border text-foreground font-mono"
                           />
                         </div>
@@ -740,6 +865,12 @@ export default function ConfidentialTranscriptDashboard() {
                       )}
                     </Button>
                   </CardContent>
+                  {
+                    isEligibleForScholarship 
+                    ? (<div className="text-center text-xl font-bold text-green-400">Congrats, You are eligible for scholarship.</div>)
+                    : (<div className="text-center text-xl font-bold text-red-400">Sorry, You are not eligible for any scholarship.</div>)
+
+                  }
                 </Card>
               </TabsContent>
 
@@ -777,6 +908,15 @@ export default function ConfidentialTranscriptDashboard() {
                       )}
                     </Button>
                   </CardContent>
+                  {
+                    decryptedCid &&  (<div className="text-center text-green-400">
+                       <span className="font-bold text-xl">CID</span>
+                    <br />
+                    <a href={`https://ipfs.io/ipfs/${baseCid}/${decryptedCid}.pdf`} target="_blank">https://ipfs.io/ipfs/{baseCid}/{decryptedCid}.pdf</a>
+                     </div>)
+                    
+
+                  }
                 </Card>
               </TabsContent>
             </Tabs>

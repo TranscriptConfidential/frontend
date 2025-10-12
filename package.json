@@ -10,6 +10,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "multiformats": "^13.4.1",
     "pinata-web3": "^0.5.4"
   }
 }
