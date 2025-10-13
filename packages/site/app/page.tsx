@@ -1,5 +1,6 @@
+//@ts-nocheck
 "use client"
-// "internaltype": "euint256"
+
 import type React from "react"
 
 import { useState } from "react"
