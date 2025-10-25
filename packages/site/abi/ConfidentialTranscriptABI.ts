@@ -923,6 +923,19 @@ export const ConfidentialTranscriptABI = {
     {
       "inputs": [
         {
+          "internalType": "string",
+          "name": "_cid",
+          "type": "string"
+        }
+      ],
+      "name": "setCid",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_pg_address",
           "type": "address"
