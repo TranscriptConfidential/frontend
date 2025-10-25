@@ -393,8 +393,8 @@ export default function ConfidentialTranscriptDashboard() {
               <GraduationCap className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">Confidential Transcript</h1>
-              <p className="text-sm text-muted-foreground">FHE-Powered Academic Records</p>
+              <h1 className="text-xl font-semibold text-foreground">Wagmi State University</h1>
+              <p className="text-sm text-muted-foreground">Student Portal</p>
             </div>
           </div>
 
