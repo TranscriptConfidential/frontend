@@ -609,7 +609,7 @@ export default function ConfidentialTranscriptDashboard() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
                         <Upload className="w-5 h-5 text-primary" />
-                        Upload Transcript to IPFS
+                        Upload Transcript to IPFS (OPTIONAL IF NOT DONE MANUALLY)
                       </CardTitle>
                       <CardDescription className="text-muted-foreground">
                         Upload PDF transcript to Pinata and get CID for minting
