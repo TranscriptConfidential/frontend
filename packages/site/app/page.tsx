@@ -868,8 +868,8 @@ export default function ConfidentialTranscriptDashboard() {
                   </CardContent>
                   {
                     isEligibleForScholarship 
-                    ? (<div className="text-center text-xl font-bold text-green-400">Congrats, You are eligible for scholarship.</div>)
-                    : (<div className="text-center text-xl font-bold text-red-400">Sorry, You are not eligible for any scholarship.</div>)
+                    ? (<div className="text-center text-xl font-bold text-green-400">Congrats, this student is eligible for scholarship.</div>)
+                    : (<div className="text-center text-xl font-bold text-red-400">Sorry, this student is not eligible for any scholarship.</div>)
 
                   }
                 </Card>
