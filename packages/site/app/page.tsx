@@ -439,7 +439,7 @@ export default function ConfidentialTranscriptDashboard() {
               </div>
               <CardTitle className="text-foreground">Connect Your Wallet</CardTitle>
               <CardDescription className="text-muted-foreground">
-                Connect your wallet to interact with the Confidential Transcript contract
+                Connect your wallet to interact with Wagmi State University Student Portal
               </CardDescription>
             </CardHeader>
             <CardContent>

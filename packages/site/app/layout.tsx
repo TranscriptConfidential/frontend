@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import { FheProvider } from "@/config/FheRelayey";
 
 export const metadata: Metadata = {
-  title: "ConfidentialTranscript"
+  title: "Wagmi State University Student Portal"
 };
 
 export default async function RootLayout({
