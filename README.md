@@ -1,164 +1,183 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NarutoLab/fhevm-zama-mail-app/refs/heads/main/packages/site/public/zama-image.jpg" alt="FHEZmail Logo" />
-</p>
+# 🎓 Zama FHE-Powered Academic Transcripts
 
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Sepolia Testnet](https://img.shields.io/badge/Network-Sepolia-blue)](#)
-[![Ethereum](https://img.shields.io/badge/Platform-Ethereum-purple)](#)
-[![React](https://img.shields.io/badge/Frontend-React-blue?logo=react)](#)
-[![Next.js](https://img.shields.io/badge/Framework-Next.js-black?logo=next.js)](#)
-
-**FHEZmail** is a **decentralized, privacy email platform** on the Ethereum Sepolia testnet. Using **Fully Homomorphic Encryption (FHE)**, all emails are encrypted on-chain, and only the sender and recipient can read their content.
+A decentralized academic record and scholarship verification system built with [Zama's](https://docs.zama.ai) Fully Homomorphic Encryption (FHE).
+This dApp enables Wagmi State University (WSU) to issue encrypted academic transcripts and allows postgraduate authorities to verify students’ scholarship eligibility securely.
 
 ---
 
-## 🌐 Live Demo
+## 🚀 Overview
 
-- **Testnet Smart Contract:** [`0xCB45011ca6B8CDce01792CBB9B4c999479E94a0E`](https://sepolia.etherscan.io/address/0xCB45011ca6B8CDce01792CBB9B4c999479E94a0E)
-- **Frontend (Next.js/React):** [https://fhevm-zmail.netlify.app/](https://fhevm-zmail.netlify.app/) (or deploy your own)
+The ConfidentialTranscript contract represents each student’s transcript as a SBT, linked to an IPFS folder containing their academic record.
 
----
+-   University staffs can set transcript issuer (Uni) and scholarship-checking (PG) addresses.
+-   Students can decrypt and retrieve their transcript IPFS path privately.
+-   Post-graduate (PG) authorities can check student scholarship eligibility based on the CGPA threshold.
 
-## 📖 Project Overview
-
-FHEZmail combines **blockchain** and **FHE encryption** to create an email system that is:
-
-- **Decentralized:** All emails stored on-chain, no central server.
-- **Encrypted:** Subjects and bodies encrypted with Fully Homomorphic Encryption.
-- **Threaded:** Supports replies and forwards while preserving privacy.
-- **Organized:** Emails sorted into **Inbox, Sent, Archive, Star, Spam, Trash, and Read**.
+All transcript files are off-chain on IPFS, while metadata and CGPA validation are on-chain.
 
 ---
 
-## 🏗 Technologies Used
+## 🏗️ How It Works
 
-### Smart Contract (On-chain)
+### 1. 🧑‍💼 Admin Dashboard
 
-- **Solidity 0.8.24**
-- **Fully Homomorphic Encryption (FHE):**
-- **SepoliaConfig** – Preconfigured Sepolia testnet setup
+This is the entry page for authorized university staff.
 
-### Frontend (User Interface)
-
-- **React** – Modern, responsive UI
-- **Next.js** – Server-side rendering & optimized builds
-- **@zama-fhe/relayer-sdk** – Integrates FHE encryption/decryption on FE
+-   Set the University Address — the issuer of student transcripts.
+-   Set the Post-Graduate (PG) Address — the address that can verify student scholarship eligibility.
+-   Both addresses are stored in the smart contract.
 
 ---
 
-## ⚡ Key Features
+### 2. 🏫 University Transcript Upload Flow
 
-1. **Send Emails**
-   - Encrypts subject & body using FHE
-   - Creates copies for sender (`Sent`) and recipient (`Inbox`)
-   - Permission management for encryption
+1. Prepare student transcripts:
+   Each class set (e.g. 2025) has its transcripts stored in a folder named like:
 
-2. **Reply**
-   - Replies within existing threads
-   - Updates boxes and maintains encryption
+-   The file naming format:
 
-3. **Forward**
-   - Securely forward emails
-   - Updates permissions for new recipients
+    [ClassYear][StudentID][7-digit random number]
+    Example:
 
-4. **Move Emails**
-   - Move emails between boxes
-   - TRASH box is handled specially
+    -   25 → Class of 2025
+    -   01 → Student ID (enumerated alphabetically)
+    -   9720801 → Random digits for extra security
 
-5. **View Emails & Threads**
-   - Fetch mails by box type
-   - Fetch full threads with encrypted replies
+        Filename: 2501972081.pdf
+
+2. Upload folder containing student transcripts to IPFS (via [Pinata](https://www.app.pinata.cloud) or similar) and get it's CID e.g:
+   bafybeicaovgk5reqfzqotlfdk3ul4kwlfr7qdkoivmf3zoku7st43vwmta
+
+3. Mint students’ transcript via the University dashboard:
+
+-   Input:
+    -   Student Address (e.g., 0x1234...abcd)
+    -   Student ID (e.g., 01)
+    -   CID Number (the filename, e.g., 2501972081)
+    -   CGPA (e.g., 3.52)
+-   On mint:
+    -   The contract uses Zama’s encryption to securely store the student’s CID Number and CGPA.
+    -   Each transcript is linked to the student’s address as a Soulbound Token (SBT), providing access to that specific address.
+    -   Only the corresponding student’s address can decrypt their CID and retrieve their transcript.
 
 ---
 
-## 🛠 Getting Started
+### 3. 🧑‍🎓 Student Portal
 
-### Prerequisites
+Each student can access their transcript using the “Reveal Transcript” button. When clicked, the dApp performs the following steps:
 
-- Node.js >= 20
-- Yarn or npm
-- MetaMask or Web3 wallet
-- Sepolia testnet ETH
+1. Retrieves the base IPFS hash of the class folder.
+2. Decrypts and appends the student’s CID number (used as their filename).
+3. Generates the full IPFS path, e.g:
+   https://ipfs.io/ipfs/bafybeicaovgk5reqfzqotlfdk3ul4kwlfr7qdkoivmf3zoku7st43vwmta/2501972081
+4. The student can then open the link to view or download their transcript.
 
-### Installation
+---
 
-```bash
-git clone https://github.com/NarutoLab/fhevm-zama-mail-app.git
-cd pakages/site
+### 4. 🎓 Scholarship Eligibility Check
+
+On the Scholarship Check tab, the Postgraduate (PG) staff provides:
+
+-   Student Address (e.g., 0x1234...abcd)
+-   CGPA Threshold (e.g., 3.5)
+
+When “Check Student Eligibility” is clicked:
+
+-   The smart contract retrieves the student’s encrypted CGPA and compares it with the provided threshold.
+-   It then returns one of the following results:
+-   ✅ “This student is eligible for a scholarship.” – if the CGPA meets or exceeds the threshold.
+-   ❌ “This student is not eligible for a scholarship.” – if the CGPA is below the threshold.
+
+Note:
+
+-   The PG address does not have access to the student’s transcript or personal data. It can only verify students’ eligibility, without revealing their exact CGPA or CID.
+
+---
+
+## 🧩 Smart Contract Summary
+
+### Contract: ConfidentialTranscript
+
+Each transcript is represented by this struct:
+
+```solidity
+struct TranscriptRecord {
+    address issuer; // university address
+    address owner; // student address
+    euint256 encCID; // encrypted CID (filename)
+    euint16 encGPA; // encrypted CGPA
+    uint256 issuedAt; // timestamp
+}
+```
+
+| Function                                                                                                                                   | Access     | Description                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------------------------------------------------- |
+| `constructor(address _uni_address, address _pg_address, string memory _cid)`                                                               | Owner      | Set up Uni address, PG address, and base IPFS hash |
+| `mintTranscriptExternal(address student, uint256 studentID, externalEuint256 _encCID, externalEuint16 _encGpa, bytes calldata inputProof)` | University | Issues a new transcript SBT to a student           |
+| `decryptCid()`                                                                                                                             | Student    | Requests decryption for their CID                  |
+| `checkScholarshipEligibilityByAddress(address student, uint16 threshold)`                                                                  | PG         | Returns true if CGPA ≥ threshold, else false       |
+| `setUniversity(address _uni_address)`                                                                                                      | Owner      | Updates the university issuer address              |
+| `setPGAddress(address _pg_address)`                                                                                                        | Owner      | Updates the PG scholarship checker address         |
+
+---
+
+## ⚙️ Developer Setup
+
+1. Clone the repository
+
+```sh
+git clone https://github.com/TranscriptConfidential/frontend
+```
+
+```sh
+cd packages/site
+```
+
+2. Install dependencies
+
+```sh
 npm install
 ```
 
-### Running Frontend
+3. Compile contracts
 
-```bash
+```sh
+npx hardhat compile
+```
+
+4. Deploy locally
+
+```sh
+npx hardhat run scripts/deploy.js --network localhost
+```
+
+5. Run locally
+
+```sh
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to access the dApp.
+---
+
+## 🔐 Future Upgrades
+
+To make the system more scalable, user-friendly, and adaptable for multiple institutions, future improvements will include:
+
+-   Integrate transcript upload to IPFS directly on the school website, reducing manual handling.
+-   Support batch minting of student transcripts for entire classes.
+-   Extend the system to onboard multiple universities, each with its own issuer address and PG authority
 
 ---
 
-## 💻 Smart Contract Interaction
+## 📜 License
 
-**Contract Address:** [`0xCB45011ca6B8CDce01792CBB9B4c999479E94a0E`](https://sepolia.etherscan.io/address/0xCB45011ca6B8CDce01792CBB9B4c999479E94a0E)
-
-**Key Functions:**
-
-```typescript
-// Send a new email
-sendMail(to, subjectExternal, subjectProofs, bodyExternal, bodyProofs);
-
-// Reply to a thread
-reply(threadId, subjectExternal, subjectProofs, bodyExternal, bodyProofs);
-
-// Forward an email
-forward(mailId, to);
-
-// Move emails between boxes
-move(mailIds, newBox);
-
-// Fetch emails
-(inbox(user),
-  sent(user),
-  archive(user),
-  star(user),
-  spam(user),
-  trash(user),
-  read(user));
-```
+This project is licensed under the BSD-3-Clause-Clear License - see the [LICENSE FILE](./license) for details.
 
 ---
 
-## 🌟 Future Potential
+## 👥 Contributors
 
-FHEZmail lays the foundation for **next-gen decentralized communication**:
+This project was developed by:
 
-- **Cross-chain Encrypted Messaging**
-- **Decentralized Identity Integration** (ENS, DIDs)
-- **Encrypted Search & Filters** without decryption
-
----
-
-## 🔒 Security & Privacy
-
-- Emails are **encrypted on-chain**; only allowed participants can decrypt
-- No plaintext stored on-chain
-- Full control of permissions using FHE primitives
-
----
-
-## Documentation
-
-- [Hardhat + MetaMask](https://docs.metamask.io/wallet/how-to/run-devnet/): Set up your local devnet step by step using Hardhat and MetaMask.
-- [FHEVM Documentation](https://docs.zama.ai/protocol/solidity-guides/)
-- [FHEVM Hardhat](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat)
-- [@zama-fhe/relayer-sdk Documentation](https://docs.zama.ai/protocol/relayer-sdk-guides/)
-- [Setting up MNEMONIC and INFURA_API_KEY](https://docs.zama.ai/protocol/solidity-guides/getting-started/setup#set-up-the-hardhat-configuration-variables-optional)
-- [React Documentation](https://reactjs.org/)
-- [FHEVM Discord Community](https://discord.com/invite/zama)
-- [GitHub Issues](https://github.com/zama-ai/fhevm-react-template/issues)
-
-## License
-
-This project is licensed under the BSD-3-Clause-Clear License - see the LICENSE file for details.
+-   [0xBitzz](https://github.com/0xBitzz) – Backend & Smart Contract Development
+-   [airishGuy](https://github.com/airishGuy) – Frontend & dApp Integration
