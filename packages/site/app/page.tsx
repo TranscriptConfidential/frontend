@@ -693,11 +693,11 @@ export default function ConfidentialTranscriptDashboard() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="enc-gpa" className="text-foreground">
-                            GPA
+                            CGPA
                           </Label>
                           <Input
                             id="enc-gpa"
-                            placeholder="Gpa"
+                            placeholder="CGPA"
                             value={GPA}
                             onChange={(e) => setGPA(e.target.value)}
                             className="bg-input border-border text-foreground font-mono"
