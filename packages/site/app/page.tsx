@@ -857,7 +857,7 @@ export default function ConfidentialTranscriptDashboard() {
                           Requesting...
                         </>
                       ) : (
-                        "Request CID Decryption"
+                        "Reveal Transcript"
                       )}
                     </Button>
                   </CardContent>
