@@ -74,7 +74,7 @@ Each student can access their transcript using the “Reveal Transcript” butto
 
 ---
 
-### 4. 🎓 Scholarship Eligibility Check
+### 4. 🎓 Check Student Scholarship Eligibility
 
 On the Scholarship Check tab, the Postgraduate (PG) staff provides:
 
