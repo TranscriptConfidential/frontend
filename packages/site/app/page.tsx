@@ -551,8 +551,8 @@ export default function ConfidentialTranscriptDashboard() {
                     <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
-                        <XCircle className="w-5 h-5 text-destructive" />
-                        Update CID
+                        {/* <XCircle className="w-5 h-5 text-destructive" /> */}
+                        Update IPFS Hash
                       </CardTitle>
                       <CardDescription className="text-muted-foreground">
                         
@@ -561,10 +561,10 @@ export default function ConfidentialTranscriptDashboard() {
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <Label className="text-foreground">
-                          New CID
+                          New IPFS Hash
                         </Label>
                         <Input
-                          placeholder="Enter new CID"
+                          placeholder="Enter IPFS Hash"
                           value={newCID}
                           onChange={(e) => setNewCID(e.target.value)}
                           className="bg-input border-border text-foreground"
@@ -582,7 +582,7 @@ export default function ConfidentialTranscriptDashboard() {
                             Processing...
                           </>
                         ) : (
-                          "Set CID"
+                          "Set IPFS Hash"
                         )}
                       </Button>
                     </CardContent>
