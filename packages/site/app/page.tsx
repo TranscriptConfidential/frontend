@@ -587,25 +587,9 @@ export default function ConfidentialTranscriptDashboard() {
               <TabsContent value="university" className="space-y-6">
                 <div className="grid gap-6">
 
-                {/* <p>convert from cid to number</p>
-                <input type="text" placeholder="convert from cid to number" onChange={(e) => setCidToNumber_(e.target.value)} />
-                <button className="cursor-pointer" onClick={() => {
-                    console.log("convert from cid to number");
-                    console.log(cidToNumber_);
-                    const res = cidToNumber(cidToNumber_);
-                    console.log(res);
-                }}>convert..</button> */}
+               
 
-                {/* <p>convert from number to cid</p>
-                <input type="text" placeholder="convert from number to cid" onChange={(e) => setNumberToCid_(e.target.value)} />
-                <button className="cursor-pointer" onClick={() => {
-                    console.log("convert from number to cid");
-                    console.log(numberToCid_);
-                    const res = numberToCid(numberToCid_);
-                    console.log(res);
-                }}>convert..</button> */}
-
-                  <Card className="bg-card border-border">
+                  {/* <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
                         <Upload className="w-5 h-5 text-primary" />
@@ -649,42 +633,10 @@ export default function ConfidentialTranscriptDashboard() {
                         disabled={true}
                         className="w-full bg-primary hover:bg-primary/90"
                       >
-                        {/* {uploading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Uploading to IPFS...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4 mr-2" />
-                            Upload to Pinata
-                          </>
-                        )} */}
+                       
                       </Button>
-
-                      {/* {uploadedCID && (
-                        <Alert className="bg-success/10 border-success/30">
-                          <CheckCircle2 className="h-4 w-4 text-success" />
-                          <AlertDescription className="space-y-2">
-                            <div className="text-success-foreground">
-                              <strong>Upload successful!</strong>
-                            </div>
-                            <div className="text-xs space-y-1">
-                              <div>
-                                <span className="text-muted-foreground">CID:</span>{" "}
-                                <code className="text-foreground font-mono">{uploadedCID}</code>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">CID as Number:</span>{" "}
-                                <code className="text-foreground font-mono text-xs break-all">{cidAsNumber}</code>
-                              </div>
-                            </div>
-                          </AlertDescription>
-                        </Alert>
-                      )} */}
-
                     </CardContent>
-                  </Card>
+                  </Card> */}
 
                   <Card className="bg-card border-border">
                     <CardHeader>
