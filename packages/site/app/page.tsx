@@ -40,7 +40,9 @@ export default function ConfidentialTranscriptDashboard() {
   const [loading, setLoading] = useState(false)
   const [loadinguni, setLoadinguni] = useState(false)
   const [loadingpg, setLoadingpg] = useState(false)
+  const [loadingcid, setLoadingcid] = useState(false)
   const [txHash, setTxHash] = useState("")
+  const [newCID, setNewCID] = useState("")
 
   // Admin/Owner functions
   const [newUniAddress, setNewUniAddress] = useState("")
@@ -343,11 +345,29 @@ export default function ConfidentialTranscriptDashboard() {
   }
 
   const handleRevokeTranscript = async () => {
-    setLoading(true)
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+
+    
+      setLoading(true);
+      try {
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+
+ 
+        const tx = await contract.revokeTranscript(tokenIdToRevoke);
+        const response = await tx.wait()
+        console.log({response});
+        if(!response) return;
+
+        toast.success("revokeTranscript Txn success");
+        setLoading(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoading(false)
+    }
   }
 
   const handleDecryptCID = async () => {
@@ -381,6 +401,33 @@ export default function ConfidentialTranscriptDashboard() {
         toast.error(JSON.stringify(err));
         setLoading(false)
     }
+  }
+
+
+  const handleSetCID = async () => {
+
+    setLoadingcid(true);
+      try {
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+
+ 
+        const tx = await contract.setCid(newCID);
+        const response = await tx.wait()
+        console.log({response});
+        if(!response) return;
+
+        toast.success("setCid Txn success");
+        setLoadingcid(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoadingcid(false)
+    }
+
   }
 
   return (
@@ -500,7 +547,50 @@ export default function ConfidentialTranscriptDashboard() {
 
               {/* Admin Tab */}
               <TabsContent value="admin" className="space-y-6">
+                <div>
+                    <Card className="bg-card border-border">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-foreground">
+                        <XCircle className="w-5 h-5 text-destructive" />
+                        Update CID
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-foreground">
+                          New CID
+                        </Label>
+                        <Input
+                          placeholder="Enter new CID"
+                          value={newCID}
+                          onChange={(e) => setNewCID(e.target.value)}
+                          className="bg-input border-border text-foreground"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleSetCID}
+                        className="w-full bg-black cursor-pointer"
+                      >
+                        
+
+                        {loadingcid ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          "Set CID"
+                        )}
+                      </Button>
+                    </CardContent>
+                </Card>
+                </div>
+                
                 <div className="grid gap-6 md:grid-cols-2">
+                    
                   <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
