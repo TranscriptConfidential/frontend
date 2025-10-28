@@ -770,10 +770,10 @@ export default function ConfidentialTranscriptDashboard() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-foreground">
                       <Award className="w-5 h-5 text-primary" />
-                      Check Scholarship Eligibility
+                      Check Student Scholarship Eligibility
                     </CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Verify if a student meets the GPA threshold without revealing their actual GPA
+                      Verify if a student meets the CGPA threshold without revealing their actual CGPA
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -791,7 +791,7 @@ export default function ConfidentialTranscriptDashboard() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="threshold" className="text-foreground">
-                        GPA Threshold (scaled by 100)
+                        CGPA Threshold (scaled by 100)
                       </Label>
                       <Input
                         id="threshold"
@@ -801,7 +801,7 @@ export default function ConfidentialTranscriptDashboard() {
                         onChange={(e) => setGpaThreshold(e.target.value)}
                         className="bg-input border-border text-foreground"
                       />
-                      <p className="text-xs text-muted-foreground">Example: 350 = 3.50 GPA</p>
+                      <p className="text-xs text-muted-foreground">Example: 350 = 3.50 CGPA</p>
                     </div>
                     <Button
                       onClick={handleCheckEligibility}
@@ -820,8 +820,8 @@ export default function ConfidentialTranscriptDashboard() {
                   </CardContent>
                   {
                     isEligibleForScholarship 
-                    ? (<div className="text-center text-xl font-bold text-green-400">Congrats, this student is eligible for scholarship.</div>)
-                    : (<div className="text-center text-xl font-bold text-red-400">Sorry, this student is not eligible for any scholarship.</div>)
+                    ? (<div className="text-center text-xl font-bold text-green-400">This student is eligible for scholarship.</div>)
+                    : (<div className="text-center text-xl font-bold text-red-400">This student is not eligible for scholarship.</div>)
 
                   }
                 </Card>
