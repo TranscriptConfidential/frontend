@@ -171,8 +171,8 @@ This means that anyone who obtains the shared hash could potentially enumerate a
 
 To make the system more scalable, user-friendly, and adaptable for multiple institutions, future improvements will include:
 
--   Each student’s transcript will be associated with a unique IPFS CID.
-    This CID will be encoded or hashed into a 256-bit representation and encrypted using Zama’s euint256, ensuring that no one can access other student's transcripts.
+-   Each student’s transcript will be associated with a unique IPFS hash.
+    This IPFS hash will be encoded into a 256-bit representation and encrypted using Zama’s euint256, ensuring that no one can access other students’ transcripts.
 -   Integrate transcript upload to IPFS directly on the school website, reducing manual handling.
 -   Support batch minting of student transcripts for entire classes.
 -   Extend the system to onboard multiple universities, each with its own issuer address and PG authority.
