@@ -40,7 +40,9 @@ export default function ConfidentialTranscriptDashboard() {
   const [loading, setLoading] = useState(false)
   const [loadinguni, setLoadinguni] = useState(false)
   const [loadingpg, setLoadingpg] = useState(false)
+  const [loadingcid, setLoadingcid] = useState(false)
   const [txHash, setTxHash] = useState("")
+  const [newCID, setNewCID] = useState("")
 
   // Admin/Owner functions
   const [newUniAddress, setNewUniAddress] = useState("")
@@ -343,11 +345,29 @@ export default function ConfidentialTranscriptDashboard() {
   }
 
   const handleRevokeTranscript = async () => {
-    setLoading(true)
-    setTimeout(() => {
-      setTxHash("0x" + Math.random().toString(16).substring(2, 66))
-      setLoading(false)
-    }, 2000)
+
+    
+      setLoading(true);
+      try {
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+
+ 
+        const tx = await contract.revokeTranscript(tokenIdToRevoke);
+        const response = await tx.wait()
+        console.log({response});
+        if(!response) return;
+
+        toast.success("revokeTranscript Txn success");
+        setLoading(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoading(false)
+    }
   }
 
   const handleDecryptCID = async () => {
@@ -381,6 +401,33 @@ export default function ConfidentialTranscriptDashboard() {
         toast.error(JSON.stringify(err));
         setLoading(false)
     }
+  }
+
+
+  const handleSetCID = async () => {
+
+    setLoadingcid(true);
+      try {
+
+        const contract = new ethers.Contract(
+          ConfidentialTranscriptAddresses["11155111"].address,
+          ConfidentialTranscriptABI.abi,
+          ethersSigner
+        );
+
+ 
+        const tx = await contract.setCid(newCID);
+        const response = await tx.wait()
+        console.log({response});
+        if(!response) return;
+
+        toast.success("setCid Txn success");
+        setLoadingcid(false)
+    } catch (err) {
+        toast.error(JSON.stringify(err));
+        setLoadingcid(false)
+    }
+
   }
 
   return (
@@ -500,7 +547,50 @@ export default function ConfidentialTranscriptDashboard() {
 
               {/* Admin Tab */}
               <TabsContent value="admin" className="space-y-6">
+                <div>
+                    <Card className="bg-card border-border">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-foreground">
+                        {/* <XCircle className="w-5 h-5 text-destructive" /> */}
+                        Update IPFS Hash
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-foreground">
+                          New IPFS Hash
+                        </Label>
+                        <Input
+                          placeholder="Enter IPFS Hash"
+                          value={newCID}
+                          onChange={(e) => setNewCID(e.target.value)}
+                          className="bg-input border-border text-foreground"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleSetCID}
+                        className="w-full bg-black cursor-pointer"
+                      >
+                        
+
+                        {loadingcid ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          "Set IPFS Hash"
+                        )}
+                      </Button>
+                    </CardContent>
+                </Card>
+                </div>
+                
                 <div className="grid gap-6 md:grid-cols-2">
+                    
                   <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
@@ -587,25 +677,9 @@ export default function ConfidentialTranscriptDashboard() {
               <TabsContent value="university" className="space-y-6">
                 <div className="grid gap-6">
 
-                {/* <p>convert from cid to number</p>
-                <input type="text" placeholder="convert from cid to number" onChange={(e) => setCidToNumber_(e.target.value)} />
-                <button className="cursor-pointer" onClick={() => {
-                    console.log("convert from cid to number");
-                    console.log(cidToNumber_);
-                    const res = cidToNumber(cidToNumber_);
-                    console.log(res);
-                }}>convert..</button> */}
+               
 
-                {/* <p>convert from number to cid</p>
-                <input type="text" placeholder="convert from number to cid" onChange={(e) => setNumberToCid_(e.target.value)} />
-                <button className="cursor-pointer" onClick={() => {
-                    console.log("convert from number to cid");
-                    console.log(numberToCid_);
-                    const res = numberToCid(numberToCid_);
-                    console.log(res);
-                }}>convert..</button> */}
-
-                  <Card className="bg-card border-border">
+                  {/* <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
                         <Upload className="w-5 h-5 text-primary" />
@@ -649,42 +723,10 @@ export default function ConfidentialTranscriptDashboard() {
                         disabled={true}
                         className="w-full bg-primary hover:bg-primary/90"
                       >
-                        {/* {uploading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Uploading to IPFS...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4 mr-2" />
-                            Upload to Pinata
-                          </>
-                        )} */}
+                       
                       </Button>
-
-                      {/* {uploadedCID && (
-                        <Alert className="bg-success/10 border-success/30">
-                          <CheckCircle2 className="h-4 w-4 text-success" />
-                          <AlertDescription className="space-y-2">
-                            <div className="text-success-foreground">
-                              <strong>Upload successful!</strong>
-                            </div>
-                            <div className="text-xs space-y-1">
-                              <div>
-                                <span className="text-muted-foreground">CID:</span>{" "}
-                                <code className="text-foreground font-mono">{uploadedCID}</code>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">CID as Number:</span>{" "}
-                                <code className="text-foreground font-mono text-xs break-all">{cidAsNumber}</code>
-                              </div>
-                            </div>
-                          </AlertDescription>
-                        </Alert>
-                      )} */}
-
                     </CardContent>
-                  </Card>
+                  </Card> */}
 
                   <Card className="bg-card border-border">
                     <CardHeader>
@@ -741,11 +783,11 @@ export default function ConfidentialTranscriptDashboard() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="enc-gpa" className="text-foreground">
-                            GPA
+                            CGPA
                           </Label>
                           <Input
                             id="enc-gpa"
-                            placeholder="Gpa"
+                            placeholder="CGPA"
                             value={GPA}
                             onChange={(e) => setGPA(e.target.value)}
                             className="bg-input border-border text-foreground font-mono"
@@ -818,10 +860,10 @@ export default function ConfidentialTranscriptDashboard() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-foreground">
                       <Award className="w-5 h-5 text-primary" />
-                      Check Scholarship Eligibility
+                      Check Student Scholarship Eligibility
                     </CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Verify if a student meets the GPA threshold without revealing their actual GPA
+                      Verify if a student meets the CGPA threshold without revealing their actual CGPA
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -839,7 +881,7 @@ export default function ConfidentialTranscriptDashboard() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="threshold" className="text-foreground">
-                        GPA Threshold (scaled by 100)
+                        CGPA Threshold (scaled by 100)
                       </Label>
                       <Input
                         id="threshold"
@@ -849,7 +891,7 @@ export default function ConfidentialTranscriptDashboard() {
                         onChange={(e) => setGpaThreshold(e.target.value)}
                         className="bg-input border-border text-foreground"
                       />
-                      <p className="text-xs text-muted-foreground">Example: 350 = 3.50 GPA</p>
+                      <p className="text-xs text-muted-foreground">Example: 350 = 3.50 CGPA</p>
                     </div>
                     <Button
                       onClick={handleCheckEligibility}
@@ -868,8 +910,8 @@ export default function ConfidentialTranscriptDashboard() {
                   </CardContent>
                   {
                     isEligibleForScholarship 
-                    ? (<div className="text-center text-xl font-bold text-green-400">Congrats, this student is eligible for scholarship.</div>)
-                    : (<div className="text-center text-xl font-bold text-red-400">Sorry, this student is not eligible for any scholarship.</div>)
+                    ? (<div className="text-center text-xl font-bold text-green-400">This student is eligible for scholarship.</div>)
+                    : (<div className="text-center text-xl font-bold text-red-400">This student is not eligible for scholarship.</div>)
 
                   }
                 </Card>
@@ -905,7 +947,7 @@ export default function ConfidentialTranscriptDashboard() {
                           Requesting...
                         </>
                       ) : (
-                        "Request CID Decryption"
+                        "Reveal Transcript"
                       )}
                     </Button>
                   </CardContent>
