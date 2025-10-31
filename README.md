@@ -1,7 +1,8 @@
-# 🎓 Zama FHE-Powered Academic Transcripts
+# 🎓 Transcript Confidential: FHE-Powered Academic Transcripts
 
-A decentralized academic record and scholarship verification system built with [Zama's](https://docs.zama.ai) Fully Homomorphic Encryption (FHE).
-This dApp enables Wagmi State University (WSU) to issue encrypted academic transcripts and allows postgraduate authorities to verify students’ scholarship eligibility securely.
+A decentralized academic record and scholarship verification system built with **[Zama's](https://docs.zama.ai) Fully Homomorphic Encryption (FHE)**.
+This dApp enables **Wagmi State University (WSU)** to issue encrypted academic transcripts and allows postgraduate authorities to verify students’ scholarship eligibility **without revealing their CGPA or transcript**.
+> This proof-of-concept demonstrates how Zama’s FHE can enforce privacy by ensuring only authorized parties can access specific information, while others cannot. It also showcases blind computation, allowing postgraduate authorities to verify a student’s scholarship eligibility by securely computing on the encrypted CGPA — without ever decrypting it.
 
 ---
 
@@ -9,7 +10,7 @@ This dApp enables Wagmi State University (WSU) to issue encrypted academic trans
 
 The ConfidentialTranscript contract represents each student’s transcript as a SBT, linked to an IPFS folder containing their academic record.
 
--   University staffs can set transcript issuer (Uni) and scholarship-checking (PG) addresses.
+-   University staff can set transcript issuer (Uni) and scholarship-checking (PG) addresses.
 -   Students can decrypt and retrieve their transcript IPFS path privately.
 -   Post-graduate (PG) authorities can check student scholarship eligibility based on the CGPA threshold.
 
@@ -45,7 +46,7 @@ This is the entry page for authorized university staff.
 
         Filename: 2501972081.pdf
 
-2. Upload folder containing student transcripts to IPFS (via [Pinata](https://www.app.pinata.cloud) or similar) and get it's CID e.g:
+2. Upload folder containing student transcripts to IPFS (via [Pinata](https://www.app.pinata.cloud) or similar) and get its CID e.g:
    bafybeicaovgk5reqfzqotlfdk3ul4kwlfr7qdkoivmf3zoku7st43vwmta
 
 3. Mint students’ transcript via the University dashboard:
@@ -74,7 +75,7 @@ Each student can access their transcript using the “Reveal Transcript” butto
 
 ---
 
-### 4. 🎓 Scholarship Eligibility Check
+### 4. 🎓 Check Student Scholarship Eligibility
 
 On the Scholarship Check tab, the Postgraduate (PG) staff provides:
 
@@ -90,7 +91,7 @@ When “Check Student Eligibility” is clicked:
 
 Note:
 
--   The PG address does not have access to the student’s transcript or personal data. It can only verify students’ eligibility, without revealing their exact CGPA or CID.
+-   The PG address cannot access the student’s transcript or personal data; it can only verify eligibility without revealing the student’s actual CGPA or CID.
 
 ---
 
@@ -110,14 +111,14 @@ struct TranscriptRecord {
 }
 ```
 
-| Function                                                                                                                                   | Access     | Description                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------------------------------------------------- |
-| `constructor(address _uni_address, address _pg_address, string memory _cid)`                                                               | Owner      | Set up Uni address, PG address, and base IPFS hash |
-| `mintTranscriptExternal(address student, uint256 studentID, externalEuint256 _encCID, externalEuint16 _encGpa, bytes calldata inputProof)` | University | Issues a new transcript SBT to a student           |
-| `decryptCid()`                                                                                                                             | Student    | Requests decryption for their CID                  |
-| `checkScholarshipEligibilityByAddress(address student, uint16 threshold)`                                                                  | PG         | Returns true if CGPA ≥ threshold, else false       |
-| `setUniversity(address _uni_address)`                                                                                                      | Owner      | Updates the university issuer address              |
-| `setPGAddress(address _pg_address)`                                                                                                        | Owner      | Updates the PG scholarship checker address         |
+| Function                                                                                                                                   | Access     | Description                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------------------------------------------- |
+| `constructor(address _uni_address, address _pg_address)`                                                                                   | Owner      | Set up Uni address, PG address               |
+| `mintTranscriptExternal(address student, uint256 studentID, externalEuint256 _encCID, externalEuint16 _encGpa, bytes calldata inputProof)` | University | Issues a new transcript SBT to a student     |
+| `decryptCid()`                                                                                                                             | Student    | Requests decryption for their CID            |
+| `checkScholarshipEligibilityByAddress(address student, uint16 threshold)`                                                                  | PG         | Returns true if CGPA ≥ threshold, else false |
+| `setUniversity(address _uni_address)`                                                                                                      | Owner      | Updates the university issuer address        |
+| `setPGAddress(address _pg_address)`                                                                                                        | Owner      | Updates the PG scholarship checker address   |
 
 ---
 
@@ -159,13 +160,22 @@ npm run dev
 
 ---
 
+### ⚠️ Current Limitation:
+
+In the current implementation, all students share the same base IPFS hash for transcript storage.
+This means that anyone who obtains the shared hash could potentially enumerate and access other students’ transcripts.
+
+---
+
 ## 🔐 Future Upgrades
 
 To make the system more scalable, user-friendly, and adaptable for multiple institutions, future improvements will include:
 
+-   Each student’s transcript will be associated with a unique IPFS hash.
+    This IPFS hash will be encoded into a 256-bit representation and encrypted using Zama’s euint256, ensuring that no one can access other students’ transcripts.
 -   Integrate transcript upload to IPFS directly on the school website, reducing manual handling.
 -   Support batch minting of student transcripts for entire classes.
--   Extend the system to onboard multiple universities, each with its own issuer address and PG authority
+-   Extend the system to onboard multiple universities, each with its own issuer address and PG authority.
 
 ---
 
