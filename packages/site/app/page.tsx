@@ -548,10 +548,9 @@ export default function ConfidentialTranscriptDashboard() {
               {/* Admin Tab */}
               <TabsContent value="admin" className="space-y-6">
                 <div>
-                    <Card className="bg-card border-border">
+                    {/* <Card className="bg-card border-border">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-foreground">
-                        {/* <XCircle className="w-5 h-5 text-destructive" /> */}
                         Update IPFS Hash
                       </CardTitle>
                       <CardDescription className="text-muted-foreground">
@@ -586,7 +585,7 @@ export default function ConfidentialTranscriptDashboard() {
                         )}
                       </Button>
                     </CardContent>
-                </Card>
+                    </Card> */}
                 </div>
                 
                 <div className="grid gap-6 md:grid-cols-2">
