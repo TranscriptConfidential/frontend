@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
-import { FheProvider } from "@/config/FheRelayey";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Wagmi State University Student Portal"
@@ -16,7 +16,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" type="image/svg+xml" href="/zama-image.jpg" />
+         <Script
+      src="https://cdn.zama.ai/relayer-sdk-js/0.2.0/relayer-sdk-js.umd.cjs"
+      type="text/javascript"
+      strategy="beforeInteractive"
+    />
+        <link rel="icon" type="image/svgxml" href="/zama-image.jpg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -24,9 +29,14 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=block"
+          href="https://fonts.googleapis.com/css2?family=MaterialSymbolsOutlined:FILL@0..1&display=block"
           rel="stylesheet"
         />
+ 
+
+
+      
+
       </head>
       <body className={`text-foreground antialiased`}>
             <Providers>{children}</Providers>

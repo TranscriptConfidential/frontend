@@ -28,9 +28,9 @@ import { ConfidentialTranscriptAddresses } from "@/abi/ConfidentialTranscriptAdd
 import { ConfidentialTranscriptABI } from "@/abi/ConfidentialTranscriptABI";
 import { useMetaMaskEthersSigner } from "@/hooks/metamask/useMetaMaskEthersSigner";
 import { ethers, hexlify } from "ethers";
-import { useFhevm } from "@/fhevm/useFhevm";
 import { toast } from "sonner";
 import { getFheInstance, initializeFheInstance } from "@/utils/fheinstance";
+
 
 
 export default function ConfidentialTranscriptDashboard() {
@@ -74,12 +74,12 @@ export default function ConfidentialTranscriptDashboard() {
 
   const { acount, isConnected, disconnect, connect, provider, chainId, ethersSigner, initialMockChains } = useMetaMaskEthersSigner();
 
-  const { status: fheInstanceStatus, instance: fheInstance } = useFhevm({
-    provider,
-    chainId,
-    initialMockChains,
-    enabled: true,
-  });
+//   const { status: fheInstanceStatus, instance: fheInstance } = useFhevm({
+//     provider,
+//     chainId,
+//     initialMockChains,
+//     enabled: true,
+//   });
 
 
   const connectWallet = async () => {
@@ -240,18 +240,20 @@ export default function ConfidentialTranscriptDashboard() {
         console.log({studentAddress, studentID, cidNumber, formattedGpa});
 
 
-        const fhe = await initializeFHE();
-        const input = await fhe.createEncryptedInput(ConfidentialTranscriptAddresses["11155111"].address, ethersSigner?.address);
-        input.add256(BigInt(cidNumber));
-        input.add16(formattedGpa);
-        const { handles, inputProof } = await input.encrypt();
-        const encryptedCidHex = hexlify(handles[0]);
-        const encryptedGpaHex = hexlify(handles[1]);
-        const proofHex = hexlify(inputProof);
+        // const fhe = await initializeFHE();
+        console.log({fheInstance});
+        console.log({instance});
 
-        console.log(encryptedCidHex, encryptedGpaHex, proofHex);
+        const result = await instance!
+        .createEncryptedInput(ConfidentialTranscriptAddresses["11155111"].address, ethersSigner?.address)
+        .add256(BigInt(cidNumber))
+        .add16(formattedGpa)
+        .encrypt();
+        console.log({result});
+
+
  
-        const tx = await contract.mintTranscriptExternal(studentAddress, studentID, encryptedCidHex, encryptedGpaHex, proofHex);
+        const tx = await contract.mintTranscriptExternal(studentAddress, studentID, result.handles[0], result.handles[1], result.inputProof);
         const response = await tx.wait()
         console.log({response});
 
@@ -371,32 +373,110 @@ export default function ConfidentialTranscriptDashboard() {
   }
 
   const handleDecryptCID = async () => {
+    console.log("handleDecryptCID")
     setLoading(true)
 
-    try {
+    // try {
 
+    //     const contract = new ethers.Contract(
+    //       ConfidentialTranscriptAddresses["11155111"].address,
+    //       ConfidentialTranscriptABI.abi,
+    //       ethersSigner
+    //     );
+
+ 
+    //     const tx = await contract.decryptCid();
+    //     const response = await tx.wait()
+    //     console.log({response});
+    //     if(!response) return;
+
+    //     // read value and set
+    //     const baseCid_ = await contract.cid();
+    //     console.log({baseCid_});
+    //     setBaseCid(baseCid_);
+    //     const decryptedVal = await contract._decryptedCID(ethersSigner?.address);
+    //     console.log({decryptedVal});
+    //     setDecryptedCid(decryptedVal.toString());
+
+    //     toast.success("handleDecryptCID Txn success");
+    //     setLoading(false)
+    // } catch (err) {
+    //     toast.error(JSON.stringify(err));
+    //     setLoading(false)
+    // }
+
+    try {
         const contract = new ethers.Contract(
           ConfidentialTranscriptAddresses["11155111"].address,
           ConfidentialTranscriptABI.abi,
-          ethersSigner
+          ethersSigner?.provider
+        );
+        // read encrypted student gpa
+        const res = await contract._transcripts(ethersSigner?.address);
+        const encCID = res[2];
+        console.log({encCID});
+
+        
+        const fhe = await initializeFheInstance();
+
+
+        let value = BigInt(0);
+        const keypair = fhe!.generateKeypair();
+        const handleContractPairs = [
+            {
+                handle: encCID,
+                contractAddress: ConfidentialTranscriptAddresses["11155111"].address,
+            },
+        ];
+        const startTimeStamp = Math.floor(Date.now() / 1000).toString();
+        const durationDays = "2"; // String for consistency
+        const contractAddresses = [ConfidentialTranscriptAddresses["11155111"].address];
+
+        const eip712 = fhe!.createEIP712(
+            keypair.publicKey, 
+            contractAddresses, 
+            startTimeStamp, 
+            durationDays
+        );
+        
+
+        const signature = await ethersSigner!.signTypedData(
+            eip712.domain,
+            {
+                UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
+            },
+            eip712.message,
         );
 
- 
-        const tx = await contract.decryptCid();
-        const response = await tx.wait()
-        console.log({response});
-        if(!response) return;
+        console.log('Signature:', signature);
+
+        const result = await fhe.userDecrypt(
+            handleContractPairs,
+            keypair.privateKey,
+            keypair.publicKey,
+            signature!.replace("0x", ""),
+            contractAddresses,
+            ethersSigner!.address,
+            startTimeStamp,
+            durationDays,
+        );
+
+        value = BigInt(result[encCID]);
+        console.log({result, value})
+
+        console.log({decryptedValue: value.toString()});
 
         // read value and set
         const baseCid_ = await contract.cid();
         console.log({baseCid_});
         setBaseCid(baseCid_);
-        const decryptedVal = await contract._decryptedCID(ethersSigner?.address);
-        console.log({decryptedVal});
-        setDecryptedCid(decryptedVal.toString());
+
+        
+        setDecryptedCid(value.toString());
 
         toast.success("handleDecryptCID Txn success");
         setLoading(false)
+        
     } catch (err) {
         toast.error(JSON.stringify(err));
         setLoading(false)

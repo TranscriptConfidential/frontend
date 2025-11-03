@@ -437,25 +437,6 @@ export const ConfidentialTranscriptABI = {
           "type": "address"
         }
       ],
-      "name": "_decryptedCID",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
       "name": "_studentToken",
       "outputs": [
         {
@@ -501,6 +482,11 @@ export const ConfidentialTranscriptABI = {
           "internalType": "uint256",
           "name": "issuedAt",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "clearCID",
+          "type": "uint64"
         }
       ],
       "stateMutability": "view",
@@ -631,6 +617,25 @@ export const ConfidentialTranscriptABI = {
           "internalType": "address",
           "name": "",
           "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "student",
+          "type": "address"
+        }
+      ],
+      "name": "getClearTranscript",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
         }
       ],
       "stateMutability": "view",

@@ -4,5 +4,5 @@
   By commands: 'npx hardhat deploy' or 'npx hardhat node'
 */
 export const ConfidentialTranscriptAddresses = { 
-  "11155111": { address: "0x77aE3F850cd021803d47fcB4D950D591f1DF4d93", chainId: 11155111, chainName: "sepolia" }
+  "11155111": { address: "0x1905d9452A1Be4b532f414Ab552cfc147FA6f5d0", chainId: 11155111, chainName: "sepolia" }
 };
